@@ -22,6 +22,13 @@ func New(lang Lang, client ...*http.Client) *Client {
 	c := &Client{
 		HTTP: http.DefaultClient,
 		lang: lang,
+		// HTTP: &http.Client{
+		// 	Timeout: d.Timeout,
+		// 	Transport: &http.Transport{
+		// 		DialTLSContext:      d.DialContext,
+		// 		TLSHandshakeTimeout: d.Timeout,
+		// 	},
+		// },
 	}
 	if len(client) > 0 && client[0] != nil {
 		c.HTTP = client[0]
@@ -98,8 +105,11 @@ func (c *Client) request(ctx context.Context, url string, data, dst interface{})
 
 	dec := json.NewDecoder(resp.Body)
 	if err := dec.Decode(dst); err != nil {
-		raw, _ := io.ReadAll(io.MultiReader(dec.Buffered(), resp.Body))
-		err = fmt.Errorf("balaboba: %s\nresponse: %s", err.Error(), string(raw))
+		raw, err := io.ReadAll(io.MultiReader(dec.Buffered(), resp.Body))
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("response: %s, error: %w", string(raw), err)
 	}
 	return err
 }
