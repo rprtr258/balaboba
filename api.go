@@ -9,29 +9,33 @@ import (
 	"time"
 )
 
-const apiurl = "https://yandex.ru/lab/api/yalm/"
+// Lang represents balaboba language.
+type Lang uint8
 
-// ClientRus is default russian client.
-var ClientRus = NewWithTimeout(Rus, 20*time.Second)
+// available languages.
+const (
+	Rus Lang = iota
+	Eng
 
-// ClientEng is default english client.
-var ClientEng = NewWithTimeout(Eng, 20*time.Second)
+	apiurl = "https://yandex.ru/lab/api/yalm/"
+)
+
+var (
+	// ClientRus is default russian client.
+	ClientRus = NewWithTimeout(Rus, 20*time.Second)
+
+	// ClientEng is default english client.
+	ClientEng = NewWithTimeout(Eng, 20*time.Second)
+)
 
 // New makes new balaboba api client.
 func New(lang Lang, client ...*http.Client) *Client {
 	c := &Client{
-		HTTP: http.DefaultClient,
-		lang: lang,
-		// HTTP: &http.Client{
-		// 	Timeout: d.Timeout,
-		// 	Transport: &http.Transport{
-		// 		DialTLSContext:      d.DialContext,
-		// 		TLSHandshakeTimeout: d.Timeout,
-		// 	},
-		// },
+		httpClient: http.DefaultClient,
+		lang:       lang,
 	}
 	if len(client) > 0 && client[0] != nil {
-		c.HTTP = client[0]
+		c.httpClient = client[0]
 	}
 	return c
 }
@@ -43,8 +47,8 @@ func NewWithTimeout(lang Lang, timeout time.Duration) *Client {
 
 // Client is Yandex Balaboba client.
 type Client struct {
-	HTTP *http.Client
-	lang Lang
+	httpClient *http.Client
+	lang       Lang
 }
 
 type responseBase struct {
@@ -89,7 +93,7 @@ func (c *Client) request(ctx context.Context, url string, data, dst interface{})
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	resp, err := c.HTTP.Do(req)
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -105,13 +109,15 @@ func (c *Client) request(ctx context.Context, url string, data, dst interface{})
 
 	dec := json.NewDecoder(resp.Body)
 	if err := dec.Decode(dst); err != nil {
-		raw, err := io.ReadAll(io.MultiReader(dec.Buffered(), resp.Body))
-		if err != nil {
-			return err
+		raw, err2 := io.ReadAll(io.MultiReader(dec.Buffered(), resp.Body))
+		if err2 != nil {
+			return err2
 		}
+
 		return fmt.Errorf("response: %s, error: %w", string(raw), err)
 	}
-	return err
+
+	return nil
 }
 
 // Lang returns client language.
@@ -150,12 +156,3 @@ func (c Client) BadQuery() string {
 	}
 	return BadQueryEng
 }
-
-// Lang represents balaboba language.
-type Lang uint8
-
-// available languages.
-const (
-	Rus Lang = iota
-	Eng
-)

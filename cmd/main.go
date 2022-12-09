@@ -3,13 +3,17 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
+	"log"
 	"strings"
 
 	"github.com/karalef/balaboba"
+	"github.com/urfave/cli/v2"
 )
 
 var (
+	app = cli.App{
+		Name: "balaboba",
+	}
 	style  = flag.Uint("s", 0, "generation style")
 	text   = flag.String("t", "", "text to generate")
 	styles = flag.Bool("styles", false, "print all available styles")
@@ -20,17 +24,17 @@ var (
 func init() {
 	flag.Parse()
 	if *eng {
-		bb = balaboba.ClientEng
+		client = balaboba.ClientEng
 	} else {
-		bb = balaboba.ClientRus
+		client = balaboba.ClientRus
 	}
 }
 
-var bb *balaboba.Client
+var client *balaboba.Client
 
 func main() {
 	if *help {
-		fmt.Printf("%s\n\n%s\n\n", bb.About(), bb.Warn1())
+		fmt.Printf("%s\n\n%s\n\n", client.About(), client.Warn1())
 		flag.PrintDefaults()
 		return
 	}
@@ -50,24 +54,27 @@ func main() {
 
 	fmt.Println("please wait up to 20 seconds")
 
-	r, err := bb.Generate(*text, balaboba.Style(*style))
+	r, err := client.Generate(*text, balaboba.Style(*style))
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		log.Fatal(err.Error())
 	}
+
 	fmt.Println(r.Text)
 }
 
 func printStyles() {
-	allStyles := [...]balaboba.Style{
-		balaboba.Standart, balaboba.UserManual,
-		balaboba.Recipes, balaboba.ShortStories,
-		balaboba.WikipediaSipmlified, balaboba.MovieSynopses,
+	allStyles := []balaboba.Style{
+		balaboba.Standart,
+		balaboba.UserManual,
+		balaboba.Recipes,
+		balaboba.ShortStories,
+		balaboba.WikipediaSipmlified,
+		balaboba.MovieSynopses,
 		balaboba.FolkWisdom,
 	}
 	fmt.Println("Styles:")
-	for _, s := range allStyles {
-		str, desc := s.Description(bb.Lang())
-		fmt.Println(s, "-", str, "-", desc)
+	for _, style := range allStyles {
+		str, desc := style.Description(client.Lang())
+		fmt.Println(style, "-", str, "-", desc)
 	}
 }
