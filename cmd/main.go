@@ -24,7 +24,7 @@ var (
 				Name:    "style",
 				Aliases: []string{"s"},
 				Usage:   "generation style",
-				Value:   &balaboba.Style{},
+				Value:   &balaboba.Standart,
 			},
 		},
 		UsageText: `Нейросеть не знает, что говорит, и может сказать всякое — если что, не обижайтесь.
@@ -75,7 +75,7 @@ var (
 					client = balaboba.ClientEng
 				}
 
-				r, err := client.Generate(ctx.Context, text, ctx.Generic("style").(balaboba.Style))
+				r, err := client.Generate(ctx.Context, text, *ctx.Generic("style").(*balaboba.Style))
 				if err != nil {
 					return err
 				}
