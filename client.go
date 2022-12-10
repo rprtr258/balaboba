@@ -1,6 +1,7 @@
 package balaboba
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -75,15 +76,18 @@ func (c *Client) request(ctx context.Context, url string, request map[string]any
 	var body io.Reader
 
 	if request != nil {
-		var w *io.PipeWriter
-		body, w = io.Pipe()
-		go func() { w.CloseWithError(json.NewEncoder(w).Encode(request)) }()
+		bodyBytes, err := json.Marshal(request)
+		if err != nil {
+			return fmt.Errorf("marshaling request failed: %w", err)
+		}
+
+		body = bytes.NewBuffer(bodyBytes)
 		method = http.MethodPost
 	}
 
 	req, err := http.NewRequestWithContext(ctx, method, url, body)
 	if err != nil {
-		return err
+		return fmt.Errorf("request create failed: %w", err)
 	}
 
 	if body != nil {
@@ -92,7 +96,7 @@ func (c *Client) request(ctx context.Context, url string, request map[string]any
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("http request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -100,9 +104,12 @@ func (c *Client) request(ctx context.Context, url string, request map[string]any
 		return fmt.Errorf("balaboba: response status %s", resp.Status)
 	}
 
-	dec := json.NewDecoder(resp.Body)
-	if err := dec.Decode(response); err != nil {
-		raw, err2 := io.ReadAll(io.MultiReader(dec.Buffered(), resp.Body))
+	responseDecoder := json.NewDecoder(resp.Body)
+	if err := responseDecoder.Decode(response); err != nil {
+		raw, err2 := io.ReadAll(io.MultiReader(
+			responseDecoder.Buffered(),
+			resp.Body,
+		))
 		multierr.AppendInto(&err, err2)
 
 		return fmt.Errorf("could not parse response, raw=%q: %w", raw, err)
