@@ -13,7 +13,7 @@ import (
 )
 
 // Lang represents balaboba language.
-type Lang uint8
+type Lang int
 
 // available languages.
 const (

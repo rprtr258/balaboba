@@ -74,8 +74,8 @@ var (
 				eng := ctx.Bool("eng")
 				style := *ctx.Generic("style").(*balaboba.Style)
 
-				text := strings.Join(args, " ")
-				if text == "" {
+				query := strings.Join(args, " ")
+				if query == "" {
 					return errors.New("write the text to generate")
 				}
 
@@ -88,12 +88,12 @@ var (
 					Lang: lang,
 				})
 
-				r, err := client.Generate(ctx.Context, text, style)
+				r, err := client.Generate(ctx.Context, query, style)
 				if err != nil {
 					return err
 				}
 
-				fmt.Println(r.Text())
+				fmt.Println(query + r.Text)
 
 				return nil
 			},
