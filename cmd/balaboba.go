@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/karalef/balaboba"
+	"github.com/rprtr258/balaboba"
 	"github.com/urfave/cli/v2"
 )
 
