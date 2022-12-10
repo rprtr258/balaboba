@@ -75,6 +75,7 @@ var (
 					client = balaboba.ClientEng
 				}
 
+				// TODO: fix 403
 				r, err := client.Generate(ctx.Context, text, *ctx.Generic("style").(*balaboba.Style))
 				if err != nil {
 					return err
