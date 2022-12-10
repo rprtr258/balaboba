@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"go.uber.org/multierr"
 )
 
 // Lang represents balaboba language.
@@ -109,11 +111,9 @@ func (c *Client) request(ctx context.Context, url string, request map[string]any
 	dec := json.NewDecoder(resp.Body)
 	if err := dec.Decode(response); err != nil {
 		raw, err2 := io.ReadAll(io.MultiReader(dec.Buffered(), resp.Body))
-		if err2 != nil {
-			return err2
-		}
+		multierr.AppendInto(&err, err2)
 
-		return fmt.Errorf("response: %s, error: %w", string(raw), err)
+		return fmt.Errorf("could not parse response, raw=%q: %w", raw, err)
 	}
 
 	return nil
