@@ -80,7 +80,7 @@ var (
 					return err
 				}
 
-				fmt.Println(r.Text)
+				fmt.Println(r.Text())
 
 				return nil
 			},

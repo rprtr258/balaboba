@@ -6,14 +6,14 @@ import (
 
 // Response contains generated text.
 type Response struct {
-	// Contains the query + generated continuation.
-	//
-	// If BadQuery is true it contains the
-	// bad query text in the Client language.
-	Text     string
 	BadQuery bool
 
 	raw response
+}
+
+// Text generated plus query
+func (resp *Response) Text() string {
+	return resp.raw.Query + resp.raw.Text
 }
 
 type response struct {
@@ -49,14 +49,8 @@ func (c *Client) GenerateContext(ctx context.Context, query string, style Style,
 		return nil, err
 	}
 
-	if resp.raw.BadQuery != 0 {
-		return &Response{
-			BadQuery: true,
-		}, nil
-	}
-
 	return &Response{
-		raw:  resp.raw,
-		Text: resp.raw.Query + resp.raw.Text,
+		raw:      resp.raw,
+		BadQuery: resp.raw.BadQuery != 0,
 	}, nil
 }
