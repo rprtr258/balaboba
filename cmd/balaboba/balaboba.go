@@ -20,12 +20,6 @@ var (
 				DefaultText: "use english language",
 				Value:       false,
 			},
-			&cli.GenericFlag{
-				Name:    "style",
-				Aliases: []string{"s"},
-				Usage:   "generation style",
-				Value:   &balaboba.Standart,
-			},
 		},
 		UsageText: `Нейросеть не знает, что говорит, и может сказать всякое — если что, не обижайтесь.
 Распространяя получившиеся тексты, помните об ответственности. (18+)
@@ -69,6 +63,14 @@ var (
 		}, {
 			Name:  "generate",
 			Usage: "generate text",
+			Flags: []cli.Flag{
+				&cli.GenericFlag{
+					Name:    "style",
+					Aliases: []string{"s"},
+					Usage:   "generation style",
+					Value:   &balaboba.Standart,
+				},
+			},
 			Action: func(ctx *cli.Context) error {
 				args := ctx.Args().Slice()
 				eng := ctx.Bool("eng")

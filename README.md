@@ -13,7 +13,7 @@ go get github.com/rprtr258/balaboba
 
 ## As a binary
 ```
-go install github.com/rprtr258/balaboba/cmd@latest
+go install github.com/rprtr258/balaboba/cmd/balaboba@latest
 ```
 
 ## What is a Balaboba?

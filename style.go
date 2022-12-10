@@ -68,18 +68,19 @@ var (
 	}
 )
 
+// TODO: remove from public interface
 func (s *Style) Set(value string) error {
 	id, err := strconv.Atoi(value)
 	if err != nil {
 		return errors.New("invalid style")
 	}
 
-	style, ok := StylesByID[id]
-	if !ok {
-		return errors.New("invalid style")
+	if style, ok := StylesByID[id]; ok {
+		*s = style
+	} else {
+		*s = Style{id: id}
 	}
 
-	*s = style
 	return nil
 }
 
