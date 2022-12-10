@@ -68,7 +68,7 @@ func (r *responseBase) Error() error {
 	return nil
 }
 
-func (c *Client) do(ctx context.Context, endpoint string, request, response interface{}) error {
+func (c *Client) do(ctx context.Context, endpoint string, request map[string]any, response interface{}) error {
 	return c.request(ctx, apiurl+endpoint, request, response)
 }
 
@@ -121,7 +121,7 @@ func (c *Client) request(ctx context.Context, url string, data, dst interface{})
 // Response contains generated text.
 type Response struct {
 	BadQuery bool
-	raw      response
+	raw      generateResponse
 }
 
 // Text generated plus query
@@ -129,7 +129,7 @@ func (resp *Response) Text() string {
 	return resp.raw.Query + resp.raw.Text
 }
 
-type response struct {
+type generateResponse struct {
 	responseBase
 	Query     string `json:"query"`
 	Text      string `json:"text"`
