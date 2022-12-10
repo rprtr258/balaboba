@@ -21,18 +21,6 @@ const (
 
 const apiurl = "https://yandex.ru/lab/api/yalm/"
 
-var (
-	// ClientRus is default russian client.
-	ClientRus = New(ClientConfig{
-		Lang: Rus,
-	})
-
-	// ClientEng is default english client.
-	ClientEng = New(ClientConfig{
-		Lang: Eng,
-	})
-)
-
 type ClientConfig struct {
 	// Lang is language used for text generation.
 	// If not specified, Russian is used.
@@ -52,6 +40,9 @@ type Client struct {
 func New(config ClientConfig) *Client {
 	if config.HTTP == nil {
 		config.HTTP = http.DefaultClient
+	}
+	if config.Lang != Rus && config.Lang != Eng {
+		panic("invalid language")
 	}
 
 	return &Client{

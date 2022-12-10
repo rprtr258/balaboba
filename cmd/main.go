@@ -70,10 +70,14 @@ var (
 					return errors.New("write the text to generate")
 				}
 
-				client := balaboba.ClientRus
+				lang := balaboba.Rus
 				if ctx.Bool("eng") {
-					client = balaboba.ClientEng
+					lang = balaboba.Eng
 				}
+
+				client := balaboba.New(balaboba.ClientConfig{
+					Lang: lang,
+				})
 
 				r, err := client.Generate(ctx.Context, text, *ctx.Generic("style").(*balaboba.Style))
 				if err != nil {
