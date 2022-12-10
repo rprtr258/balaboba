@@ -8,12 +8,12 @@ There is no official documentation for the api, so you can only use methods foun
 ## As a library
 
 ```
-go get github.com/karalef/balaboba
+go get github.com/rprtr258/balaboba
 ```
 
 ## As a binary
 ```
-go install github.com/karalef/balaboba/cmd@latest
+go install github.com/rprtr258/balaboba/cmd@latest
 ```
 
 ## What is a Balaboba?
