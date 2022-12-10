@@ -142,17 +142,12 @@ type generateResponse struct {
 
 // Generate generates text with passed parameters.
 // It uses the context for the request.
-func (c *Client) Generate(ctx context.Context, query string, style Style, filter ...bool) (*Response, error) {
-	f := 0
-	if len(filter) > 0 && filter[0] {
-		f = 1
-	}
-
+func (c *Client) Generate(ctx context.Context, query string, style Style) (*Response, error) {
 	var resp Response
 	err := c.do(ctx, "text3", map[string]any{
 		"query":  query,
-		"intro":  style,
-		"filter": f,
+		"intro":  style.id,
+		"filter": 1,
 	}, &resp.raw)
 	if err != nil {
 		return nil, err
