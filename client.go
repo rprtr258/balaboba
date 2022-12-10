@@ -17,9 +17,9 @@ type Lang uint8
 const (
 	Rus Lang = iota
 	Eng
-
-	apiurl = "https://yandex.ru/lab/api/yalm/"
 )
+
+const apiurl = "https://yandex.ru/lab/api/yalm/"
 
 var (
 	// ClientRus is default russian client.
