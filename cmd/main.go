@@ -1,9 +1,9 @@
 package main
 
 import (
-	"flag"
+	"errors"
 	"fmt"
-	"log"
+	"os"
 	"strings"
 
 	"github.com/karalef/balaboba"
@@ -12,69 +12,82 @@ import (
 
 var (
 	app = cli.App{
-		Name: "balaboba",
+		Name:  "balaboba",
+		Usage: "generate text using yandex's balaboba neural network",
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:        "eng",
+				DefaultText: "use english language",
+				Value:       false,
+			},
+			&cli.GenericFlag{
+				Name:    "style",
+				Aliases: []string{"s"},
+				Usage:   "generation style",
+				Value:   &balaboba.Style{},
+			},
+		},
+		UsageText: `Нейросеть не знает, что говорит, и может сказать всякое — если что, не обижайтесь.
+Распространяя получившиеся тексты, помните об ответственности. (18+)
+
+Генератор может выдавать очень странные тексты.
+Пожалуйста, будьте разумны, распространяя их.
+Подумайте, не будет ли текст обидным для кого-то и не станет ли его публикация нарушением закона.
+
+Балабоба не принимает запросы на острые темы, например, про политику или религию.
+Люди могут слишком серьёзно отнестись к сгенерированным текстам.
+
+Вероятность того, что запрос задаёт одну из острых тем, определяет нейросеть, обученная на оценках случайных людей.
+Но она может перестараться или, наоборот, что-то пропустить.`,
+		Commands: []*cli.Command{{
+			Name:  "styles",
+			Usage: "print all available styles",
+			Action: func(ctx *cli.Context) error {
+				// TODO: change to stylesByID
+				allStyles := []balaboba.Style{
+					balaboba.Standart,
+					balaboba.UserManual,
+					balaboba.Recipes,
+					balaboba.ShortStories,
+					balaboba.WikipediaSipmlified,
+					balaboba.MovieSynopses,
+					balaboba.FolkWisdom,
+				}
+
+				fmt.Println("Styles:")
+				for _, style := range allStyles {
+					fmt.Println(style.String())
+				}
+
+				return nil
+			},
+		}},
+		Action: func(ctx *cli.Context) error {
+			text := strings.Join(ctx.Args().Slice(), " ")
+			if text == "" {
+				return errors.New("write the text to generate")
+			}
+
+			client := balaboba.ClientRus
+			if ctx.Bool("eng") {
+				client = balaboba.ClientEng
+			}
+
+			r, err := client.Generate(text, ctx.Generic("style").(balaboba.Style))
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(r.Text)
+
+			return nil
+		},
 	}
-	style  = flag.Uint("s", 0, "generation style")
-	text   = flag.String("t", "", "text to generate")
-	styles = flag.Bool("styles", false, "print all available styles")
-	help   = flag.Bool("help", false, "print help")
-	eng    = flag.Bool("eng", false, "use english client")
 )
 
-func init() {
-	flag.Parse()
-	if *eng {
-		client = balaboba.ClientEng
-	} else {
-		client = balaboba.ClientRus
-	}
-}
-
-var client *balaboba.Client
-
 func main() {
-	if *help {
-		fmt.Printf("%s\n\n%s\n\n", client.About(), client.Warn1())
-		flag.PrintDefaults()
-		return
-	}
-
-	if *styles {
-		printStyles()
-		return
-	}
-
-	if *text == "" {
-		*text = strings.Join(flag.Args(), " ")
-	}
-	if *text == "" {
-		fmt.Println("write the text to generate")
-		return
-	}
-
-	fmt.Println("please wait up to 20 seconds")
-
-	r, err := client.Generate(*text, balaboba.Style(*style))
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	fmt.Println(r.Text)
-}
-
-func printStyles() {
-	allStyles := []balaboba.Style{
-		balaboba.Standart,
-		balaboba.UserManual,
-		balaboba.Recipes,
-		balaboba.ShortStories,
-		balaboba.WikipediaSipmlified,
-		balaboba.MovieSynopses,
-		balaboba.FolkWisdom,
-	}
-	fmt.Println("Styles:")
-	for _, style := range allStyles {
-		str, desc := style.Description(client.Lang())
-		fmt.Println(style, "-", str, "-", desc)
+	if err := app.Run(os.Args); err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
 	}
 }

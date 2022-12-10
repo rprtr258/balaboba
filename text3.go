@@ -1,6 +1,11 @@
 package balaboba
 
-import "context"
+import (
+	"context"
+	"errors"
+	"fmt"
+	"strconv"
+)
 
 // Response contains generated text.
 type Response struct {
@@ -39,78 +44,96 @@ func (c *Client) GenerateContext(ctx context.Context, query string, style Style,
 
 	var resp Response
 	err := c.doContext(ctx, "text3", map[string]interface{}{
-		"query": query, "intro": style.Value(c.lang), "filter": f,
+		"query":  query,
+		"intro":  style,
+		"filter": f,
 	}, &resp.raw)
 	if err != nil {
 		return nil, err
 	}
 
 	if resp.raw.BadQuery != 0 {
-		resp.BadQuery = true
-		if c.lang == Rus {
-			resp.Text = BadQueryRus
-		} else {
-			resp.Text = BadQueryEng
-		}
-	} else {
-		resp.Text = resp.raw.Query + resp.raw.Text
+		return &Response{
+			BadQuery: true,
+		}, nil
 	}
 
-	return &resp, nil
+	return &Response{
+		raw:  resp.raw,
+		Text: resp.raw.Query + resp.raw.Text,
+	}, nil
 }
 
 // Style of generating text.
-type Style uint8
+type Style struct {
+	id          int
+	title       string
+	description string
+}
 
-// all styles
-const (
-	Standart Style = iota
-	UserManual
-	Recipes
-	ShortStories
-	WikipediaSipmlified
-	MovieSynopses
-	FolkWisdom
+var (
+	Standart = Style{
+		id:          0,
+		title:       "Без стиля",
+		description: "Напишите что-нибудь и получите продолжение от Балабобы",
+	}
+	ShortStories = Style{
+		id:          6,
+		title:       "Короткие истории",
+		description: "Начните писать историю, а Балабобы продолжит — иногда страшно, но чаще смешно",
+	}
+	WikipediaSipmlified = Style{
+		id:          8,
+		title:       "Короче, Википедия",
+		description: "Напишите какое-нибудь слово, а Балабоба даст этому определение",
+	}
+	MovieSynopses = Style{
+		id:          9,
+		title:       "Синопсисы фильмов",
+		description: "Напишите название фильма (существующего или нет), а Балабоба расскажет вам, о чем он",
+	}
+	FolkWisdom = Style{
+		id:          11,
+		title:       "Народные мудрости",
+		description: "Напишите что-нибудь и получите народную мудрость",
+	}
+	UserManual = Style{
+		id:          24,
+		title:       "Инструкции по применению",
+		description: "Перечислите несколько предметов, а Балабоба придумает, как их использовать",
+	}
+	Recipes = Style{
+		id:          25,
+		title:       "Рецепты",
+		description: "Перечислите съедобные ингредиенты, а Балабоба придумает рецепт с ними",
+	}
+
+	stylesByID = map[int]Style{
+		Standart.id:            Standart,
+		ShortStories.id:        ShortStories,
+		WikipediaSipmlified.id: WikipediaSipmlified,
+		MovieSynopses.id:       MovieSynopses,
+		FolkWisdom.id:          FolkWisdom,
+		UserManual.id:          UserManual,
+		Recipes.id:             Recipes,
+	}
 )
 
-func (s Style) intro(lang Lang) Intro {
-	styles := &stylesRus
-	if lang == Eng {
-		styles = &stylesEng
+func (s *Style) Set(value string) error {
+	id, err := strconv.Atoi(value)
+	if err != nil {
+		return errors.New("invalid style")
 	}
-	if int(s) > len(styles) {
-		return styles[0]
+
+	style, ok := stylesByID[id]
+	if !ok {
+		return errors.New("invalid style")
 	}
-	return styles[s]
+
+	*s = style
+	return nil
 }
 
-// Description returns style description.
-func (s Style) Description(lang Lang) (string, string) {
-	i := s.intro(lang)
-	return i.String, i.Description
-}
-
-// Value returns style code.
-func (s Style) Value(lang Lang) int {
-	return s.intro(lang).Style
-}
-
-var stylesRus = [...]Intro{
-	Standart:            {0, "Без стиля", "Напишите что-нибудь и получите продолжение от Балабобы"},
-	UserManual:          {24, "Инструкции по применению", "Перечислите несколько предметов, а Балабоба придумает, как их использовать"},
-	Recipes:             {25, "Рецепты", "Перечислите съедобные ингредиенты, а Балабоба придумает рецепт с ними"},
-	ShortStories:        {6, "Короткие истории", "Начните писать историю, а Балабобы продолжит — иногда страшно, но чаще смешно"},
-	WikipediaSipmlified: {8, "Короче, Википедия", "Напишите какое-нибудь слово, а Балабоба даст этому определение"},
-	MovieSynopses:       {9, "Синопсисы фильмов", "Напишите название фильма (существующего или нет), а Балабоба расскажет вам, о чем он"},
-	FolkWisdom:          {11, "Народные мудрости", "Напишите что-нибудь и получите народную мудрость"},
-}
-
-var stylesEng = [...]Intro{
-	Standart:            {32, "Standard", "Write something and Balaboba will continue"},
-	UserManual:          {26, "User manual", "Give Balaboba a list of items and it'll come up with a way to use them"},
-	Recipes:             {27, "Recipes", "Give Balaboba a list of edible ingredients and it'll come up with a recipe"},
-	ShortStories:        {28, "Short stories", "Start writing a story and Balaboba will continue. Scary stories, funny stories – you name it."},
-	WikipediaSipmlified: {29, "Wikipedia simplified", "Write a word and Balaboba will generate a definition for it"},
-	MovieSynopses:       {30, "Movie synopses", "Write the name of a movie (real or made up) and Balaboba will tell you what it's about"},
-	FolkWisdom:          {31, "Folk wisdom", "Write something and get a piece of folk wisdom"},
+func (style *Style) String() string {
+	return fmt.Sprintf("%2d %12s: %s", style.id, style.title, style.description)
 }

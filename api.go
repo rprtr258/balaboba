@@ -120,39 +120,10 @@ func (c *Client) request(ctx context.Context, url string, data, dst interface{})
 	return nil
 }
 
-// Lang returns client language.
-func (c Client) Lang() Lang {
-	return c.lang
-}
-
-// Warn1 returns a first warning in the client language.
-func (c Client) Warn1() string {
-	if c.lang == Rus {
-		return Warn1Rus
-	}
-	return Warn1Eng
-}
-
-// Warn2 returns a second warning in the client language.
-func (c Client) Warn2() string {
-	if c.lang == Rus {
-		return Warn2Rus
-	}
-	return Warn2Eng
-}
-
-// About returns a text about Balaboba in the client language.
-func (c Client) About() string {
-	if c.lang == Rus {
-		return AboutRus
-	}
-	return AboutEng
-}
-
-// BadQuery returns a bad query response in the client language.
-func (c Client) BadQuery() string {
-	if c.lang == Rus {
-		return BadQueryRus
-	}
-	return BadQueryEng
-}
+// // BadQuery returns a bad query response in the client language.
+// func (c Client) BadQuery() string {
+// 	if c.lang == Rus {
+// 		return BadQueryRus
+// 	}
+// 	return BadQueryEng
+// }
