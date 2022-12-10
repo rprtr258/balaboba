@@ -46,12 +46,12 @@ var (
 				// TODO: change to stylesByID
 				allStyles := []balaboba.Style{
 					balaboba.Standart,
-					balaboba.UserManual,
-					balaboba.Recipes,
 					balaboba.ShortStories,
 					balaboba.WikipediaSipmlified,
 					balaboba.MovieSynopses,
 					balaboba.FolkWisdom,
+					balaboba.UserManual,
+					balaboba.Recipes,
 				}
 
 				fmt.Println("Styles:")
@@ -61,27 +61,30 @@ var (
 
 				return nil
 			},
+		}, {
+			Name:  "generate",
+			Usage: "generate text",
+			Action: func(ctx *cli.Context) error {
+				text := strings.Join(ctx.Args().Slice(), " ")
+				if text == "" {
+					return errors.New("write the text to generate")
+				}
+
+				client := balaboba.ClientRus
+				if ctx.Bool("eng") {
+					client = balaboba.ClientEng
+				}
+
+				r, err := client.Generate(text, ctx.Generic("style").(balaboba.Style))
+				if err != nil {
+					return err
+				}
+
+				fmt.Println(r.Text)
+
+				return nil
+			},
 		}},
-		Action: func(ctx *cli.Context) error {
-			text := strings.Join(ctx.Args().Slice(), " ")
-			if text == "" {
-				return errors.New("write the text to generate")
-			}
-
-			client := balaboba.ClientRus
-			if ctx.Bool("eng") {
-				client = balaboba.ClientEng
-			}
-
-			r, err := client.Generate(text, ctx.Generic("style").(balaboba.Style))
-			if err != nil {
-				return err
-			}
-
-			fmt.Println(r.Text)
-
-			return nil
-		},
 	}
 )
 

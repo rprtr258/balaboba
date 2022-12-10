@@ -135,5 +135,5 @@ func (s *Style) Set(value string) error {
 }
 
 func (style *Style) String() string {
-	return fmt.Sprintf("%2d %12s: %s", style.id, style.title, style.description)
+	return fmt.Sprintf("%2d %-24s: %s", style.id, style.title, style.description)
 }
