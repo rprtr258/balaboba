@@ -75,7 +75,7 @@ var (
 					client = balaboba.ClientEng
 				}
 
-				r, err := client.Generate(text, ctx.Generic("style").(balaboba.Style))
+				r, err := client.Generate(ctx.Context, text, ctx.Generic("style").(balaboba.Style))
 				if err != nil {
 					return err
 				}

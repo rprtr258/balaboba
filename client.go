@@ -57,27 +57,19 @@ func New(config ClientConfig) *Client {
 	}
 }
 
-type errorable interface{ err() int }
-
 type responseBase struct {
-	Error int `json:"error"`
+	ErrorCode int `json:"error"`
 }
 
-func (r responseBase) err() int { return r.Error }
-
-func (c *Client) do(endpoint string, data interface{}, dst errorable) error {
-	return c.doContext(context.Background(), endpoint, data, dst)
+func (r *responseBase) Error() error {
+	if r.ErrorCode != 0 {
+		return fmt.Errorf("balaboba error, code: %d", r.ErrorCode)
+	}
+	return nil
 }
 
-func (c *Client) doContext(ctx context.Context, endpoint string, data interface{}, dst errorable) error {
-	err := c.request(ctx, apiurl+endpoint, data, dst)
-	if err != nil {
-		return err
-	}
-	if c := dst.err(); c != 0 {
-		err = fmt.Errorf("balaboba: error code %d", c)
-	}
-	return err
+func (c *Client) do(ctx context.Context, endpoint string, request, response interface{}) error {
+	return c.request(ctx, apiurl+endpoint, request, response)
 }
 
 func (c *Client) request(ctx context.Context, url string, data, dst interface{}) error {
@@ -147,16 +139,16 @@ type response struct {
 	Signature string `json:"signature"`
 }
 
-// GenerateContext generates text with passed parameters.
+// Generate generates text with passed parameters.
 // It uses the context for the request.
-func (c *Client) GenerateContext(ctx context.Context, query string, style Style, filter ...bool) (*Response, error) {
+func (c *Client) Generate(ctx context.Context, query string, style Style, filter ...bool) (*Response, error) {
 	f := 0
 	if len(filter) > 0 && filter[0] {
 		f = 1
 	}
 
 	var resp Response
-	err := c.doContext(ctx, "text3", map[string]interface{}{
+	err := c.do(ctx, "text3", map[string]interface{}{
 		"query":  query,
 		"intro":  style,
 		"filter": f,
@@ -169,9 +161,4 @@ func (c *Client) GenerateContext(ctx context.Context, query string, style Style,
 		raw:      resp.raw,
 		BadQuery: resp.raw.BadQuery != 0,
 	}, nil
-}
-
-// Generate generates text with passed parameters.
-func (c *Client) Generate(query string, style Style, filter ...bool) (*Response, error) {
-	return c.GenerateContext(context.Background(), query, style, filter...)
 }
