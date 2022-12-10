@@ -7,8 +7,7 @@ import (
 // Response contains generated text.
 type Response struct {
 	BadQuery bool
-
-	raw response
+	raw      response
 }
 
 // Text generated plus query
@@ -24,11 +23,6 @@ type response struct {
 	IsCached  uint8  `json:"is_cached"`
 	Intro     int    `json:"intro"`
 	Signature string `json:"signature"`
-}
-
-// Generate generates text with passed parameters.
-func (c *Client) Generate(query string, style Style, filter ...bool) (*Response, error) {
-	return c.GenerateContext(context.Background(), query, style, filter...)
 }
 
 // GenerateContext generates text with passed parameters.
@@ -53,4 +47,9 @@ func (c *Client) GenerateContext(ctx context.Context, query string, style Style,
 		raw:      resp.raw,
 		BadQuery: resp.raw.BadQuery != 0,
 	}, nil
+}
+
+// Generate generates text with passed parameters.
+func (c *Client) Generate(query string, style Style, filter ...bool) (*Response, error) {
+	return c.GenerateContext(context.Background(), query, style, filter...)
 }
