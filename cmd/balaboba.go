@@ -43,19 +43,8 @@ var (
 			Name:  "styles",
 			Usage: "print all available styles",
 			Action: func(ctx *cli.Context) error {
-				// TODO: change to stylesByID
-				allStyles := []balaboba.Style{
-					balaboba.Standart,
-					balaboba.ShortStories,
-					balaboba.WikipediaSipmlified,
-					balaboba.MovieSynopses,
-					balaboba.FolkWisdom,
-					balaboba.UserManual,
-					balaboba.Recipes,
-				}
-
 				fmt.Println("Styles:")
-				for _, style := range allStyles {
+				for _, style := range balaboba.StylesByID {
 					fmt.Println(style.String())
 				}
 

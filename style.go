@@ -49,8 +49,13 @@ var (
 		title:       "Рецепты",
 		description: "Перечислите съедобные ингредиенты, а Балабоба придумает рецепт с ними",
 	}
+	Football = Style{
+		id:          34,
+		title:       "ЧМ 2022",
+		description: "Введите заголовок новости про футбол и получите готовый комментарий",
+	}
 
-	stylesByID = map[int]Style{
+	StylesByID = map[int]Style{
 		Standart.id:            Standart,
 		ShortStories.id:        ShortStories,
 		WikipediaSipmlified.id: WikipediaSipmlified,
@@ -58,6 +63,7 @@ var (
 		FolkWisdom.id:          FolkWisdom,
 		UserManual.id:          UserManual,
 		Recipes.id:             Recipes,
+		Football.id:            Football,
 	}
 )
 
@@ -67,7 +73,7 @@ func (s *Style) Set(value string) error {
 		return errors.New("invalid style")
 	}
 
-	style, ok := stylesByID[id]
+	style, ok := StylesByID[id]
 	if !ok {
 		return errors.New("invalid style")
 	}
