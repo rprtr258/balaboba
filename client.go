@@ -34,7 +34,8 @@ var (
 )
 
 type ClientConfig struct {
-	// Lang is language used for text generation
+	// Lang is language used for text generation.
+	// If not specified, Russian is used.
 	Lang Lang
 	// HTTP is http.Client api to make requests.
 	// If not specified, http.DefaultClient is used.
