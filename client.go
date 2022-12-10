@@ -72,14 +72,18 @@ func (c *Client) do(ctx context.Context, endpoint string, request map[string]any
 	return c.request(ctx, apiurl+endpoint, request, response)
 }
 
-func (c *Client) request(ctx context.Context, url string, data map[string]any, dst interface{}) error {
+func (c *Client) request(ctx context.Context, url string, request map[string]any, response interface{}) error {
+	if response == nil {
+		panic("destionation must not be nil")
+	}
+
 	method := http.MethodGet
 	var body io.Reader
 
-	if data != nil {
+	if request != nil {
 		var w *io.PipeWriter
 		body, w = io.Pipe()
-		go func() { w.CloseWithError(json.NewEncoder(w).Encode(data)) }()
+		go func() { w.CloseWithError(json.NewEncoder(w).Encode(request)) }()
 		method = http.MethodPost
 	}
 
@@ -87,6 +91,7 @@ func (c *Client) request(ctx context.Context, url string, data map[string]any, d
 	if err != nil {
 		return err
 	}
+
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}
@@ -101,12 +106,8 @@ func (c *Client) request(ctx context.Context, url string, data map[string]any, d
 		return fmt.Errorf("balaboba: response status %s", resp.Status)
 	}
 
-	if dst == nil {
-		return nil
-	}
-
 	dec := json.NewDecoder(resp.Body)
-	if err := dec.Decode(dst); err != nil {
+	if err := dec.Decode(response); err != nil {
 		raw, err2 := io.ReadAll(io.MultiReader(dec.Buffered(), resp.Body))
 		if err2 != nil {
 			return err2
