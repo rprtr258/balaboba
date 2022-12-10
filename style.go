@@ -1,6 +1,7 @@
 package balaboba
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -84,4 +85,21 @@ func (s *Style) Set(value string) error {
 
 func (style *Style) String() string {
 	return fmt.Sprintf("%d %s: %s", style.id, style.title, style.description)
+}
+
+// UnmarshalJSON is json.Unmarshaler interface implementation.
+func (style *Style) UnmarshalJSON(b []byte) error {
+	var rep [3]interface{}
+	err := json.Unmarshal(b, &rep)
+	if err != nil {
+		return err
+	}
+
+	*style = Style{
+		id:          int(rep[0].(float64)),
+		title:       rep[1].(string),
+		description: rep[2].(string),
+	}
+
+	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -63,13 +64,15 @@ func (r *responseBase) Error() error {
 	return nil
 }
 
+// do query balaboba API by endpoint with optional request body and unmarshal result json to reqsponse struct
 func (c *Client) do(ctx context.Context, endpoint string, request map[string]any, response interface{}) error {
 	return c.request(ctx, apiurl+endpoint, request, response)
 }
 
+// do query with optional request body and unmarshal result json to reqsponse struct
 func (c *Client) request(ctx context.Context, url string, request map[string]any, response interface{}) error {
 	if response == nil {
-		panic("destination must not be nil")
+		return errors.New("destination must not be nil")
 	}
 
 	method := http.MethodGet
@@ -156,4 +159,18 @@ func (c *Client) Generate(ctx context.Context, query string, style Style) (*Resp
 		raw:      resp.raw,
 		BadQuery: resp.raw.BadQuery != 0,
 	}, nil
+}
+
+// Intros returns list of avaible generating styles.
+func (c *Client) Styles(ctx context.Context) ([]Style, error) {
+	endpoint := "intros"
+	if c.lang == Eng {
+		endpoint = "intros_eng"
+	}
+
+	var resp struct {
+		responseBase
+		Styles []Style `json:"intros"`
+	}
+	return resp.Styles, c.do(ctx, endpoint, nil, &resp)
 }

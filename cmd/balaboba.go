@@ -41,7 +41,7 @@ var (
 Но она может перестараться или, наоборот, что-то пропустить.`,
 		Commands: []*cli.Command{{
 			Name:  "styles",
-			Usage: "print all available styles",
+			Usage: "list all available styles",
 			Action: func(ctx *cli.Context) error {
 				fmt.Println("Styles:")
 				for _, style := range balaboba.StylesByID {
