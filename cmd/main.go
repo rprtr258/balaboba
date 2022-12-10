@@ -65,13 +65,17 @@ var (
 			Name:  "generate",
 			Usage: "generate text",
 			Action: func(ctx *cli.Context) error {
-				text := strings.Join(ctx.Args().Slice(), " ")
+				args := ctx.Args().Slice()
+				eng := ctx.Bool("eng")
+				style := *ctx.Generic("style").(*balaboba.Style)
+
+				text := strings.Join(args, " ")
 				if text == "" {
 					return errors.New("write the text to generate")
 				}
 
 				lang := balaboba.Rus
-				if ctx.Bool("eng") {
+				if eng {
 					lang = balaboba.Eng
 				}
 
@@ -79,7 +83,7 @@ var (
 					Lang: lang,
 				})
 
-				r, err := client.Generate(ctx.Context, text, *ctx.Generic("style").(*balaboba.Style))
+				r, err := client.Generate(ctx.Context, text, style)
 				if err != nil {
 					return err
 				}
