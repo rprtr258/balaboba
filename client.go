@@ -74,7 +74,7 @@ func (c *Client) do(ctx context.Context, endpoint string, request map[string]any
 
 func (c *Client) request(ctx context.Context, url string, request map[string]any, response interface{}) error {
 	if response == nil {
-		panic("destionation must not be nil")
+		panic("destination must not be nil")
 	}
 
 	method := http.MethodGet
