@@ -132,10 +132,12 @@ type Response struct {
 func (c *Client) Generate(ctx context.Context, query string, style Style) (*Response, error) {
 	var resp struct {
 		responseBase
-		Query     string `json:"query"`
-		Text      string `json:"text"`
-		BadQuery  uint8  `json:"bad_query"`
-		IsCached  uint8  `json:"is_cached"`
+		Query string `json:"query"`
+		Text  string `json:"text"`
+		// BadQuery is really a boolean: 0 or 1
+		BadQuery int `json:"bad_query"`
+		// IsCached is really a boolean: 0 or 1
+		IsCached  int    `json:"is_cached"`
 		Intro     int    `json:"intro"`
 		Signature string `json:"signature"`
 	}
