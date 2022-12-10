@@ -72,7 +72,7 @@ func (c *Client) do(ctx context.Context, endpoint string, request map[string]any
 	return c.request(ctx, apiurl+endpoint, request, response)
 }
 
-func (c *Client) request(ctx context.Context, url string, data, dst interface{}) error {
+func (c *Client) request(ctx context.Context, url string, data map[string]any, dst interface{}) error {
 	method := http.MethodGet
 	var body io.Reader
 
@@ -148,7 +148,7 @@ func (c *Client) Generate(ctx context.Context, query string, style Style, filter
 	}
 
 	var resp Response
-	err := c.do(ctx, "text3", map[string]interface{}{
+	err := c.do(ctx, "text3", map[string]any{
 		"query":  query,
 		"intro":  style,
 		"filter": f,
