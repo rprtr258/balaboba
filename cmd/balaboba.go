@@ -43,8 +43,24 @@ var (
 			Name:  "styles",
 			Usage: "list all available styles",
 			Action: func(ctx *cli.Context) error {
+				eng := ctx.Bool("eng")
+
+				lang := balaboba.Rus
+				if eng {
+					lang = balaboba.Eng
+				}
+
+				client := balaboba.New(balaboba.ClientConfig{
+					Lang: lang,
+				})
+
+				styles, err := client.Styles(ctx.Context)
+				if err != nil {
+					return err
+				}
+
 				fmt.Println("Styles:")
-				for _, style := range balaboba.StylesByID {
+				for _, style := range styles {
 					fmt.Println(style.String())
 				}
 
