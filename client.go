@@ -123,45 +123,38 @@ func (c *Client) request(ctx context.Context, url string, request map[string]any
 
 // Response contains generated text.
 type Response struct {
+	// Text generated
+	Text     string
 	BadQuery bool
-	raw      generateResponse
 }
 
-// Text generated plus query
-func (resp *Response) Text() string {
-	return resp.raw.Query + resp.raw.Text
-}
-
-type generateResponse struct {
-	responseBase
-	Query     string `json:"query"`
-	Text      string `json:"text"`
-	BadQuery  uint8  `json:"bad_query"`
-	IsCached  uint8  `json:"is_cached"`
-	Intro     int    `json:"intro"`
-	Signature string `json:"signature"`
-}
-
-// Generate generates text with passed parameters.
-// It uses the context for the request.
+// Generate generates text with passed parameters
 func (c *Client) Generate(ctx context.Context, query string, style Style) (*Response, error) {
-	var resp Response
-	err := c.do(ctx, "text3", map[string]any{
+	var resp struct {
+		responseBase
+		Query     string `json:"query"`
+		Text      string `json:"text"`
+		BadQuery  uint8  `json:"bad_query"`
+		IsCached  uint8  `json:"is_cached"`
+		Intro     int    `json:"intro"`
+		Signature string `json:"signature"`
+	}
+
+	if err := c.do(ctx, "text3", map[string]any{
 		"query":  query,
 		"intro":  style.id,
 		"filter": 1,
-	}, &resp.raw)
-	if err != nil {
+	}, &resp); err != nil {
 		return nil, err
 	}
 
 	return &Response{
-		raw:      resp.raw,
-		BadQuery: resp.raw.BadQuery != 0,
+		BadQuery: resp.BadQuery != 0,
+		Text:     resp.Text,
 	}, nil
 }
 
-// Intros returns list of avaible generating styles.
+// Styles gets list of available generating styles
 func (c *Client) Styles(ctx context.Context) ([]Style, error) {
 	endpoint := "intros"
 	if c.lang == Eng {
