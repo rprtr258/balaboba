@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
 )
 
 // Lang represents balaboba language.
@@ -22,42 +21,49 @@ const (
 
 var (
 	// ClientRus is default russian client.
-	ClientRus = NewWithTimeout(Rus, 20*time.Second)
+	ClientRus = New(ClientConfig{
+		Lang: Rus,
+	})
 
 	// ClientEng is default english client.
-	ClientEng = NewWithTimeout(Eng, 20*time.Second)
+	ClientEng = New(ClientConfig{
+		Lang: Eng,
+	})
 )
 
-// New makes new balaboba api client.
-func New(lang Lang, client ...*http.Client) *Client {
-	c := &Client{
-		httpClient: http.DefaultClient,
-		lang:       lang,
-	}
-	if len(client) > 0 && client[0] != nil {
-		c.httpClient = client[0]
-	}
-	return c
+type ClientConfig struct {
+	// Lang is language used for text generation
+	Lang Lang
+	// HTTP is http.Client api to make requests.
+	// If not specified, http.DefaultClient is used.
+	HTTP *http.Client
 }
 
-// NewWithTimeout makes new balaboba api client with resuests timeout.
-func NewWithTimeout(lang Lang, timeout time.Duration) *Client {
-	return New(lang, &http.Client{Timeout: timeout})
-}
-
-// Client is Yandex Balaboba client.
+// Client is Yandex Balaboba service client
 type Client struct {
 	httpClient *http.Client
 	lang       Lang
 }
+
+// New makes new balaboba api client.
+func New(config ClientConfig) *Client {
+	if config.HTTP == nil {
+		config.HTTP = http.DefaultClient
+	}
+
+	return &Client{
+		httpClient: config.HTTP,
+		lang:       config.Lang,
+	}
+}
+
+type errorable interface{ err() int }
 
 type responseBase struct {
 	Error int `json:"error"`
 }
 
 func (r responseBase) err() int { return r.Error }
-
-type errorable interface{ err() int }
 
 func (c *Client) do(endpoint string, data interface{}, dst errorable) error {
 	return c.doContext(context.Background(), endpoint, data, dst)
