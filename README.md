@@ -1,4 +1,6 @@
-# GoLang Balaboba API.
+# GoLang Balaboba API
+
+[![GoDoc](https://pkg.go.dev/badge/github.com/rprtr258/balaboba?utm_source=godoc)](https://pkg.go.dev/github.com/rprtr258/balaboba)
 
 Library for interaction with Yandex [Balaboba](https://yandex.ru/lab/yalm) API.
 
